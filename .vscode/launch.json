@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Server (tsx server.ts)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.ts",
+      "runtimeArgs": ["--import", "tsx"],
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "NODE_ENV": "development", "PORT": "3000" },
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
+    },
+    {
+      "name": "Chrome (localhost:3000)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/src"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full stack (server + Chrome)",
+      "configurations": ["Server (tsx server.ts)", "Chrome (localhost:3000)"],
+      "stopAll": true
+    }
+  ]
+}

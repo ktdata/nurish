@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "install",
+      "type": "shell",
+      "command": "bun install",
+      "problemMatcher": []
+    },
+    {
+      "label": "dev server",
+      "type": "shell",
+      "command": "bun run dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "nurish-dev",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "(Server running|localhost:\\d+|listening)"
+        }
+      },
+      "presentation": { "panel": "dedicated", "reveal": "always" },
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "typecheck",
+      "type": "shell",
+      "command": "bun run lint",
+      "problemMatcher": ["$tsc"],
+      "group": "test"
+    },
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "bun run build",
+      "problemMatcher": ["$tsc"],
+      "group": "build"
+    },
+    {
+      "label": "lint rules (eslint)",
+      "type": "shell",
+      "command": "bunx eslint .",
+      "problemMatcher": ["$eslint-stylish"]
+    }
+  ]
+}
