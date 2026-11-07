@@ -1,0 +1,114 @@
+{
+  "entities": {
+    "Pantry": {
+      "title": "Pantry",
+      "description": "Community food bank or emergency food distribution hub",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 128 },
+        "organization": { "type": "string", "maxLength": 128 },
+        "address": { "type": "string", "maxLength": 256 },
+        "city": { "type": "string", "maxLength": 64 },
+        "state": { "type": "string", "maxLength": 16 },
+        "zip": { "type": "string", "maxLength": 16 },
+        "neighborhood": { "type": "string", "maxLength": 128 },
+        "distanceMiles": { "type": "number" },
+        "openToday": { "type": "boolean" },
+        "hoursToday": { "type": "string", "maxLength": 64 },
+        "scheduleDescription": { "type": "string", "maxLength": 256 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "queueCars": { "type": "number" },
+        "queueWaitMinutes": { "type": "number" },
+        "queueTrend": { "type": "string", "enum": ["speeding_up", "stable", "slowing_down"] },
+        "lastQueueUpdate": { "type": "string", "maxLength": 64 },
+        "badges": { "type": "array" },
+        "servesUnderprivilegedArea": { "type": "boolean" },
+        "vulnerabilityPriority": { "type": "string", "enum": ["urgent", "high", "moderate"] },
+        "driveThruLaneActive": { "type": "boolean" },
+        "walkUpLaneActive": { "type": "boolean" },
+        "imageUrl": { "type": "string", "maxLength": 512 },
+        "notes": { "type": "string", "maxLength": 512 },
+        "languagesSpoken": { "type": "array" }
+      },
+      "required": ["id", "name", "address", "openToday", "queueCars", "queueWaitMinutes"]
+    },
+    "QueueReport": {
+      "title": "QueueReport",
+      "description": "Crowdsourced report of queue line cars and estimated wait time at a pantry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "pantryId": { "type": "string", "maxLength": 64 },
+        "queueCars": { "type": "number" },
+        "queueWaitMinutes": { "type": "number" },
+        "queueTrend": { "type": "string", "enum": ["speeding_up", "stable", "slowing_down"] },
+        "reporterId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["pantryId", "queueCars", "queueWaitMinutes", "queueTrend"]
+    },
+    "DeliveryRequest": {
+      "title": "DeliveryRequest",
+      "description": "Neighbor doorstep food box delivery request",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "recipientName": { "type": "string", "maxLength": 128 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "address": { "type": "string", "maxLength": 256 },
+        "neighborhood": { "type": "string", "maxLength": 128 },
+        "householdSize": { "type": "number" },
+        "boxType": { "type": "string", "maxLength": 64 },
+        "dietaryRestrictions": { "type": "array" },
+        "safeDropNotes": { "type": "string", "maxLength": 512 },
+        "urgency": { "type": "string", "enum": ["routine", "urgent_today"] },
+        "status": { "type": "string", "enum": ["pending", "assigned", "in_transit", "delivered"] },
+        "assignedDriverId": { "type": "string", "maxLength": 128 },
+        "assignedDriverName": { "type": "string", "maxLength": 128 },
+        "requestedAt": { "type": "string", "maxLength": 64 },
+        "deliveryWindow": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["recipientName", "phone", "address", "householdSize", "boxType", "status"]
+    },
+    "VolunteerShift": {
+      "title": "VolunteerShift",
+      "description": "Pantry support shift or driver delivery route for volunteers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "pantryId": { "type": "string", "maxLength": 64 },
+        "pantryName": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "maxLength": 64 },
+        "title": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 64 },
+        "timeSlot": { "type": "string", "maxLength": 64 },
+        "spotsTotal": { "type": "number" },
+        "spotsClaimed": { "type": "number" },
+        "location": { "type": "string", "maxLength": 256 },
+        "isUrgent": { "type": "boolean" },
+        "requirements": { "type": "array" },
+        "claimedByCurrentUser": { "type": "boolean" }
+      },
+      "required": ["pantryId", "role", "title", "date", "timeSlot", "spotsTotal", "spotsClaimed"]
+    }
+  },
+  "firestore": {
+    "/pantries/{pantryId}": {
+      "schema": "Pantry",
+      "description": "Public directory of food pantries with real-time queue states"
+    },
+    "/pantries/{pantryId}/queue_reports/{reportId}": {
+      "schema": "QueueReport",
+      "description": "Crowdsourced queue reports submitted for a specific pantry"
+    },
+    "/delivery_requests/{requestId}": {
+      "schema": "DeliveryRequest",
+      "description": "Neighbor requests for home doorstep food box dropoffs"
+    },
+    "/volunteer_shifts/{shiftId}": {
+      "schema": "VolunteerShift",
+      "description": "Available and claimed volunteer shifts across pantries"
+    }
+  }
+}

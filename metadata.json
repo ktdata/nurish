@@ -1,0 +1,6 @@
+{
+  "name": "NourishTogether - Community Food Access & Mutual Aid",
+  "description": "Dignified food sovereignty platform connecting community neighbors to walk-up & drive-thru pantries, live queue status, SNAP benefit pre-screener, and volunteer delivery dispatch.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

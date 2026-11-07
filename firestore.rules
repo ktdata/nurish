@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net: Default-deny all unmapped collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidQueueTrend(trend) {
+      return trend in ['speeding_up', 'stable', 'slowing_down'];
+    }
+
+    function isValidQueueReport(data) {
+      return data.keys().hasAll(['pantryId', 'queueCars', 'queueWaitMinutes', 'queueTrend']) &&
+        data.keys().hasOnly(['id', 'pantryId', 'queueCars', 'queueWaitMinutes', 'queueTrend', 'reporterId', 'createdAt']) &&
+        data.pantryId is string && data.pantryId.size() <= 64 &&
+        data.queueCars is number && data.queueCars >= 0 && data.queueCars <= 200 &&
+        data.queueWaitMinutes is number && data.queueWaitMinutes >= 0 && data.queueWaitMinutes <= 360 &&
+        isValidQueueTrend(data.queueTrend);
+    }
+
+    function isValidDeliveryRequest(data) {
+      return data.keys().hasAll(['recipientName', 'phone', 'address', 'householdSize', 'boxType', 'status']) &&
+        data.keys().hasOnly([
+          'id', 'recipientName', 'phone', 'address', 'neighborhood',
+          'householdSize', 'boxType', 'dietaryRestrictions', 'safeDropNotes',
+          'urgency', 'status', 'assignedDriverId', 'assignedDriverName',
+          'requestedAt', 'deliveryWindow', 'createdAt', 'updatedAt'
+        ]) &&
+        data.recipientName is string && data.recipientName.size() >= 2 && data.recipientName.size() <= 128 &&
+        data.phone is string && data.phone.size() <= 32 &&
+        data.address is string && data.address.size() >= 5 && data.address.size() <= 256 &&
+        data.householdSize is number && data.householdSize >= 1 && data.householdSize <= 25 &&
+        data.status in ['pending', 'assigned', 'in_transit', 'delivered'] &&
+        (!('safeDropNotes' in data) || (data.safeDropNotes is string && data.safeDropNotes.size() <= 512));
+    }
+
+    function isValidShift(data) {
+      return data.keys().hasAll(['pantryId', 'role', 'title', 'date', 'timeSlot', 'spotsTotal', 'spotsClaimed']) &&
+        data.pantryId is string && data.pantryId.size() <= 64 &&
+        data.title is string && data.title.size() <= 128 &&
+        data.spotsTotal is number && data.spotsTotal >= 1 &&
+        data.spotsClaimed is number && data.spotsClaimed >= 0 &&
+        data.spotsClaimed <= data.spotsTotal;
+    }
+
+    // --- PANTRIES DIRECTORY ---
+    match /pantries/{pantryId} {
+      allow get: if isValidId(pantryId);
+      allow list: if true;
+
+      // Queue reports sub-collection
+      match /queue_reports/{reportId} {
+        allow get: if isValidId(pantryId) && isValidId(reportId);
+        allow list: if isValidId(pantryId);
+        allow create: if isValidId(pantryId) && isValidId(reportId) &&
+          isValidQueueReport(incoming()) &&
+          incoming().pantryId == pantryId;
+      }
+    }
+
+    // --- NEIGHBOR FOOD BOX DELIVERY REQUESTS ---
+    match /delivery_requests/{requestId} {
+      allow get: if isValidId(requestId);
+      allow list: if true;
+      allow create: if isValidId(requestId) &&
+        isValidDeliveryRequest(incoming()) &&
+        incoming().status == 'pending';
+
+      // Updates for status transition and driver assignment
+      allow update: if isValidId(requestId) &&
+        isValidDeliveryRequest(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().address == existing().address &&
+        incoming().householdSize == existing().householdSize &&
+        (
+          // Action 1: Driver claims or updates delivery status
+          (
+            existing().status != 'delivered' &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['status', 'assignedDriverId', 'assignedDriverName', 'updatedAt'])
+          )
+        );
+    }
+
+    // --- VOLUNTEER SHIFTS ---
+    match /volunteer_shifts/{shiftId} {
+      allow get: if isValidId(shiftId);
+      allow list: if true;
+      allow update: if isValidId(shiftId) &&
+        isValidShift(incoming()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['spotsClaimed', 'claimedByCurrentUser', 'updatedAt']);
+    }
+  }
+}
