@@ -1,12 +1,9 @@
 {
-  "projectId": "bevz-6be28",
-  "appId": "1:332305118831:web:1a5865f8921188f11bff9a",
-  "apiKey": "AIzaSyCvTnGgX1q9EHZT92f7IfhIrgmxd3EFia8",
-  "authDomain": "bevz-6be28.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-nourishtogetherc-760322c0-f585-4f2c-a814-1b3d4bc6a56a",
-  "storageBucket": "bevz-6be28.firebasestorage.app",
-  "messagingSenderId": "332305118831",
-  "measurementId": "",
-  "oAuthClientId": "332305118831-bkl0eh0e0q508vp2h9kdlvomiuhscrah.apps.googleusercontent.com",
-  "recaptchaSiteKey": ""
+  "apiKey": "AIzaSyBkaSS_TZ1WI0XZhbFxnbb1hjcwfddpqAI",
+  "authDomain": "nurish-c956b.firebaseapp.com",
+  "projectId": "nurish-c956b",
+  "storageBucket": "nurish-c956b.firebasestorage.app",
+  "messagingSenderId": "159123655967",
+  "appId": "1:159123655967:web:648e14e1573ccce154b42a",
+  "measurementId": "G-DGPYDL1TP3"
 }
